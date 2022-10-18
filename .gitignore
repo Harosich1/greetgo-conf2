@@ -1,37 +1,168 @@
-HELP.md
+# Gradle
+# ------
 .gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+/build/
+*/**/build/
+/buildSrc/build
+/buildSrc/subprojects/*/build
+/subprojects/*/build
+/subprojects/docs/src/samples/**/build
+/subprojects/internal-android-performance-testing/build-android-libs
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+mybpm/volumes
 
-### IntelliJ IDEA ###
+# IDEA
+# ----
 .idea
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
+!/.idea
+/.idea/*
+!/.idea/codeStyles
+!/.idea/inspectionProfiles
+!/.idea/runConfigurations
+*/**/.idea
+.shelf
+*/**/*.iml
+*/**/*.ipr
+*/**/*.iws
+/*.iml
+/*.ipr
+/*.iws
+/buildSrc/.idea
+/buildSrc/.shelf
+/buildSrc/*.iml
+/buildSrc/*.ipr
+/buildSrc/*.iws
+/buildSrc/out
+/buildSrc/subprojects/*/*.iml
+/buildSrc/subprojects/*/out
+/out
+/subprojects/*/*.iml
+/subprojects/*/out
+/.teamcity/*.iml
+/.teamcity/target
+!/.teamcity/Gradle_Check_dsl.iml
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+# Eclipse
+# -------
+*.classpath
+*.project
+*.settings
+/bin
+/subprojects/*/bin
+atlassian-ide-plugin.xml
+.metadata/
 
-### VS Code ###
-.vscode/
+# NetBeans
+# --------
+.nb-gradle
+.nb-gradle-properties
+
+# Vim
+# ---
+*.sw[nop]
+
+# Emacs
+# -----
+*~
+\#*\#
+.\#*
+
+# Textmate
+# --------
+.textmate
+
+# Sublime Text
+# ------------
+*.sublime-*
+
+# jEnv
+# ----
+.java-version
+
+# macOS
+# ----
+.DS_Store
+
+# HPROF
+# -----
+*.hprof
+
+# Work dirs
+# ---------
+/incoming-distributions
+/intTestHomeDir
+
+# Logs
+# ----
+/*.log
+
+# oh-my-zsh gradle plugin
+.gradletasknamecache
+
+# etc
+*/**/.attach_pid*
+.attach_pid*
+
+# Docs
+/doc/endpoints/pdf_output/
+
+#signatures
+**/signature
+/lib/groovy-4.0.2.jar
+/lib/groovy-4.0.2-sources.jar
+/lib/groovy-ant-4.0.2.jar
+/lib/groovy-ant-4.0.2-sources.jar
+/lib/groovy-astbuilder-4.0.2.jar
+/lib/groovy-astbuilder-4.0.2-sources.jar
+/lib/groovy-cli-commons-4.0.2.jar
+/lib/groovy-cli-commons-4.0.2-sources.jar
+/lib/groovy-cli-picocli-4.0.2.jar
+/lib/groovy-cli-picocli-4.0.2-sources.jar
+/lib/groovy-console-4.0.2.jar
+/lib/groovy-console-4.0.2-sources.jar
+/lib/groovy-contracts-4.0.2.jar
+/lib/groovy-contracts-4.0.2-sources.jar
+/lib/groovy-datetime-4.0.2.jar
+/lib/groovy-datetime-4.0.2-sources.jar
+/lib/groovy-dateutil-4.0.2.jar
+/lib/groovy-dateutil-4.0.2-sources.jar
+/lib/groovy-docgenerator-4.0.2.jar
+/lib/groovy-docgenerator-4.0.2-sources.jar
+/lib/groovy-ginq-4.0.2.jar
+/lib/groovy-ginq-4.0.2-sources.jar
+/lib/groovy-groovydoc-4.0.2.jar
+/lib/groovy-groovydoc-4.0.2-sources.jar
+/lib/groovy-groovysh-4.0.2.jar
+/lib/groovy-groovysh-4.0.2-sources.jar
+/lib/groovy-jmx-4.0.2.jar
+/lib/groovy-jmx-4.0.2-sources.jar
+/lib/groovy-json-4.0.2.jar
+/lib/groovy-json-4.0.2-sources.jar
+/lib/groovy-jsr223-4.0.2.jar
+/lib/groovy-jsr223-4.0.2-sources.jar
+/lib/groovy-macro-4.0.2.jar
+/lib/groovy-macro-4.0.2-sources.jar
+/lib/groovy-macro-library-4.0.2.jar
+/lib/groovy-macro-library-4.0.2-sources.jar
+/lib/groovy-nio-4.0.2.jar
+/lib/groovy-nio-4.0.2-sources.jar
+/lib/groovy-servlet-4.0.2.jar
+/lib/groovy-servlet-4.0.2-sources.jar
+/lib/groovy-sql-4.0.2.jar
+/lib/groovy-sql-4.0.2-sources.jar
+/lib/groovy-swing-4.0.2.jar
+/lib/groovy-swing-4.0.2-sources.jar
+/lib/groovy-templates-4.0.2.jar
+/lib/groovy-templates-4.0.2-sources.jar
+/lib/groovy-test-4.0.2.jar
+/lib/groovy-test-4.0.2-sources.jar
+/lib/groovy-test-junit5-4.0.2.jar
+/lib/groovy-test-junit5-4.0.2-sources.jar
+/lib/groovy-testng-4.0.2.jar
+/lib/groovy-testng-4.0.2-sources.jar
+/lib/groovy-toml-4.0.2.jar
+/lib/groovy-toml-4.0.2-sources.jar
+/lib/groovy-typecheckers-4.0.2.jar
+/lib/groovy-typecheckers-4.0.2-sources.jar
+/lib/groovy-xml-4.0.2.jar
+/lib/groovy-xml-4.0.2-sources.jar

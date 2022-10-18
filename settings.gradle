@@ -1,1 +1,3 @@
-rootProject.name = 'temp'
+rootProject.name = 'greetgo-conf2'
+
+include "core"

@@ -1,22 +1,138 @@
+//noinspection SpellCheckingInspection
 plugins {
-	id 'org.springframework.boot' version '2.7.4'
-	id 'io.spring.dependency-management' version '1.0.14.RELEASE'
-	id 'java'
 }
 
-group = 'kz.greetgo'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+allprojects {
+  apply plugin: 'java'
+  apply plugin: 'eclipse'
+  apply plugin: 'idea'
 
-repositories {
-	mavenCentral()
+  version = '0.0.1'
+
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
+
+  group = "kz.greetgo.conf2"
+
+  buildscript {
+    repositories {
+      mavenLocal()
+      mavenCentral()
+    }
+  }
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
+
+  [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+  [compileJava, compileTestJava]*.options*.debugOptions*.debugLevel = "source,lines,vars"
+
 }
 
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
+subprojects {
 
-tasks.named('test') {
-	useJUnitPlatform()
+  task allDeps(type: DependencyReportTask) {}
+
+  dependencies {
+    ext.apacheTikaVersion = "1.24.1"
+    ext.argon2Version = "2.11"
+    ext.assertjVersion = "3.12.2"
+    ext.caffeineVersion = "2.8.5"
+    ext.clientHttp5Version = "5.1.2"
+    ext.mybpmVersion = "4.3.315"
+
+    ext.greetgoCachedVersion = "0.0.4"
+    ext.greetgoClassScannerVersion = "2.0.4"
+    ext.greetgoConfVersion = "2.0.2"
+    ext.greetgoEmailVersion = "1.0.7"
+    ext.greetgoFileStorageVersion = "2.2.0"
+    ext.greetgoKafkaVersion = "2.4.0"
+    ext.greetgoLoggingVersion = "0.1.7"
+    ext.greetgoMsOfficeVersion = "0.5.8"
+    ext.greetgoSchedulerVersion = "3.1.0"
+    ext.greetgoSecurityVersion = "1.1.5"
+    ext.greetgoSpringVersion = "0.0.7"
+    ext.greetgoUtilVersion = "1.0.3"
+    ext.greetgoNumTranslatorVersion = "0.0.3"
+
+    ext.elasticsearchClientVersion = "7.17.0"
+    ext.groovyVersion = "3.0.9"
+    ext.hikariVersion = "5.0.1"
+    ext.jacksonVersion = "2.10.4"
+    ext.jadlerVersion = "1.3.0"
+    ext.jbossResteasyVersion = "3.9.0.Final"
+    ext.jetbrainsAnnotationsVersion = "17.0.0"
+    ext.jettyVersion = '9.4.0.v20161208'
+    ext.keycloakVersion = "7.0.0"
+    ext.liquibaseVersion = "3.8.0"
+    ext.logbackVersion = "1.2.3"
+    ext.lombokVersion = '1.18.22'
+    ext.mongoSyncDriverVersion = "4.5.1"
+    ext.mybatisSpringBootStarterVersion = "2.1.1"
+    ext.okhttpVersion = "3.9.0"
+    ext.poiVersion = "4.1.1"
+    ext.postgresVersion = "42.3.3"
+    ext.slf4jApiVersion = "1.7.30"
+    ext.firebaseAdminVersion = '6.8.1'
+    ext.owaspEncoderVersion = "1.2.3"
+
+    ext.springBootVersion = "2.2.0.RELEASE"
+    ext.springVersion = "5.2.0.RELEASE"
+
+    ext.testNgVersion = "7.4.0"
+
+    testImplementation "org.testng:testng:$testNgVersion"
+    implementation "org.assertj:assertj-core:$assertjVersion"
+
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    testCompileOnly "org.projectlombok:lombok:$lombokVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+  }
+
+  tasks.withType(Javadoc) {
+    //noinspection SpellCheckingInspection
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+  }
+
+  test.useTestNG()
+  test.testLogging.exceptionFormat = "full"
+
+  idea.module.downloadSources = true
+  idea.module.downloadJavadoc = true
+  idea.module.inheritOutputDirs = false
+  idea.module.outputDir = file("$buildDir/idea_classes/main/")
+  idea.module.testOutputDir = file("$buildDir/idea_classes/test/")
+  idea.module.excludeDirs += file('mybpm/volumes')
+
+  sourceSets.main.java.srcDirs = ["src"]
+  sourceSets.test.java.srcDirs = ["test_src"]
+  sourceSets.main.resources.srcDirs = ["src_resources"]
+  sourceSets.test.resources.srcDirs = ["test_resources"]
+
+  sourceSets.main.resources {
+    srcDirs += sourceSets.main.java.srcDirs
+    exclude '**/*.java'
+  }
+  sourceSets.test.resources {
+    srcDirs += sourceSets.test.java.srcDirs
+    exclude '**/*.java'
+  }
+
+  jar {
+    manifest {
+      attributes 'Specification-Title': project.name
+      attributes 'Specification-Version': archiveVersion
+      attributes 'Specification-Vendor': "greetgo!"
+
+      attributes 'Created-By': System.getProperty("user.name")
+      attributes 'Created-At': new Date().format("yyyy-MM-dd/HH:mm:ss")
+    }
+  }
+
 }

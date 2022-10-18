@@ -1,0 +1,6 @@
+dependencies {
+
+  testImplementation "kz.greetgo.util:greetgo-util:$greetgoUtilVersion"
+  testImplementation "kz.greetgo.util:greetgo-fui:$greetgoUtilVersion"
+
+}
