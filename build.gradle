@@ -130,6 +130,9 @@ subprojects {
       attributes 'Specification-Version': archiveVersion
       attributes 'Specification-Vendor': "greetgo!"
 
+      //noinspection UnnecessaryQualifiedReference
+      attributes 'Implementation-Version': util.GitUtil.extractLastGitCommitId("${rootProject.projectDir}/.git/")
+
       attributes 'Created-By': System.getProperty("user.name")
       attributes 'Created-At': new Date().format("yyyy-MM-dd/HH:mm:ss")
     }
