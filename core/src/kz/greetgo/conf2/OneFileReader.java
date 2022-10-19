@@ -18,6 +18,8 @@ public class OneFileReader {
   private final LongSupplier delayBetweenReadMs;
 
   public List<ConfigLine> content() {
-    throw new RuntimeException("lNdqVG1KHe :: Not impl yet");
+    return fs.readFile(path)
+             .map(FileReader::content)
+             .orElseGet(defaultContentSupplier);
   }
 }

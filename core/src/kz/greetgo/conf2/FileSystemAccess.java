@@ -5,7 +5,8 @@ import java.util.Optional;
 import kz.greetgo.conf2.lines.ConfigLine;
 
 /**
- * asd
+ * Интерфейс реализации работы с файлом. Читает, создает, удаляет файл по указанному пути
+ *
  */
 public interface FileSystemAccess {
 
@@ -17,6 +18,14 @@ public interface FileSystemAccess {
    */
   Optional<FileReader> readFile(String path);
 
+  /**
+   * Записывает содержимое lines в файл по указанному пути. Если файла нет, то создается новый.
+   * Если lines являеется null файл по указаному пути файл удаляется
+   *
+   * @param path путь к файлу (вначале слэша нет)
+   * @param lines содержимое для файла
+   *
+   */
   void writeFile(String path, List<ConfigLine> lines);
 
 }
