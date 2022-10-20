@@ -1,5 +1,6 @@
 package kz.greetgo.conf2;
 
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
@@ -17,9 +18,22 @@ public class OneFileReader {
 
   private final LongSupplier delayBetweenReadMs;
 
+  private List<ConfigLine> cashedContent;
+
   public List<ConfigLine> content() {
-    return fs.readFile(path)
-             .map(FileReader::content)
-             .orElseGet(defaultContentSupplier);
+
+    long lastUpdateMs;
+
+    FileReader file = fs.readFile(path).orElseThrow();
+
+    lastUpdateMs  = file.lastModifiedAt().getTime();
+    if (new GregorianCalendar().getTime().getTime() - lastUpdateMs >= delayBetweenReadMs.getAsLong()) {
+      return file.content();
+    }
+    else {
+      cashedContent = file.content();
+    }
+
+    return cashedContent;
   }
 }
