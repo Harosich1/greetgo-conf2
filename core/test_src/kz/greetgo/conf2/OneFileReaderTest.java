@@ -36,7 +36,7 @@ public class OneFileReaderTest {
 
     fs.writeFile(path, content);
 
-    OneFileReader oneFileReader = new OneFileReader(path, fs, null, () -> 300);
+    OneFileReader oneFileReader = new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis);
 
     //
     //
@@ -74,7 +74,7 @@ public class OneFileReaderTest {
 
     fs.writeFile(path, content);
 
-    OneFileReader oneFileReader = new OneFileReader(path, fs, null, () -> 300);
+    OneFileReader oneFileReader = new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis);
 
     //
     //
