@@ -18,6 +18,8 @@ public class OneFileReader {
 
   private final LongSupplier delayBetweenReadMs;
 
+  private final LongSupplier currentTimeMs;
+
   private List<ConfigLine> cashedContent;
 
   public List<ConfigLine> content() {
@@ -27,6 +29,7 @@ public class OneFileReader {
     FileReader file = fs.readFile(path).orElseThrow();
 
     lastUpdateMs  = file.lastModifiedAt().getTime();
+    // TODO для получения текущего времени надо пользоваться полем currentTimeMs
     if (new GregorianCalendar().getTime().getTime() - lastUpdateMs >= delayBetweenReadMs.getAsLong()) {
       return file.content();
     }
