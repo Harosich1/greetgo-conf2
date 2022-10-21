@@ -93,7 +93,7 @@ public class OneFileReaderTest {
     assertThat(actualContent1).isEqualTo(content);
     assertThat(actualContent2).isEqualTo(content);
 
-    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(1);
+    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(2);
     assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(2);
 
   }

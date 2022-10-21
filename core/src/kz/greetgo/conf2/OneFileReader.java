@@ -24,17 +24,11 @@ public class OneFileReader {
 
   public List<ConfigLine> content() {
 
-    long lastUpdateMs;
-
     FileReader file = fs.readFile(path).orElseThrow();
 
-    lastUpdateMs  = file.lastModifiedAt().getTime();
-    // TODO для получения текущего времени надо пользоваться полем currentTimeMs
-    if (new GregorianCalendar().getTime().getTime() - lastUpdateMs >= delayBetweenReadMs.getAsLong()) {
-      return file.content();
-    }
-    else {
+    if (cashedContent == null || currentTimeMs.getAsLong() - System.currentTimeMillis() >= delayBetweenReadMs.getAsLong()) {
       cashedContent = file.content();
+      file.lastModifiedAt();
     }
 
     return cashedContent;
