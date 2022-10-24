@@ -2,6 +2,8 @@ package kz.greetgo.conf2;
 
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import kz.greetgo.conf2.lines.ConfigLine;
@@ -24,11 +26,15 @@ public class OneFileReader {
 
   public List<ConfigLine> content() {
 
-    FileReader file = fs.readFile(path).orElseThrow();
-
     if (cashedContent == null || currentTimeMs.getAsLong() - System.currentTimeMillis() >= delayBetweenReadMs.getAsLong()) {
-      cashedContent = file.content();
-      file.lastModifiedAt();
+      if (fs.readFile(path).isPresent()) {
+        FileReader file = fs.readFile(path).get();
+        cashedContent = file.content();
+        file.lastModifiedAt();
+      } else {
+        fs.writeFile(path, defaultContentSupplier.get());
+        cashedContent = defaultContentSupplier.get();
+      }
     }
 
     return cashedContent;

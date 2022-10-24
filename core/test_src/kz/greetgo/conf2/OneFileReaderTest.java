@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.function.Supplier;
 import kz.greetgo.conf2.lines.ConfigLine;
 import kz.greetgo.conf2.lines.ConfigLineKeyValue;
 import kz.greetgo.util.RND;
@@ -95,6 +96,42 @@ public class OneFileReaderTest {
 
     assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(2);
     assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(2);
+
+  }
+
+  @Test
+  public void content__when__file___is__not__present() {
+
+    Calendar time = new GregorianCalendar();
+
+    FileSystemAccessForTests fs = new FileSystemAccessForTests();
+    fs.nowSupplier = time::getTime;
+
+    String path = RND.str(10) + '/' + RND.str(10);
+
+    Supplier<List<ConfigLine>> defaultContentSupplier = () -> List.of(new  ConfigLineKeyValue("dg", "sdf", false));
+
+    OneFileReader oneFileReader = new OneFileReader(path, fs, defaultContentSupplier, () -> 300, time::getTimeInMillis);
+
+    //
+    //
+    List<ConfigLine> actualContent1 = oneFileReader.content();
+    //
+    //
+
+    time.add(Calendar.MILLISECOND, 2000);
+
+    //
+    //
+    List<ConfigLine> actualContent2 = oneFileReader.content();
+    //
+    //
+
+    assertThat(actualContent1).isEqualTo(defaultContentSupplier.get());
+    assertThat(actualContent2).isEqualTo(defaultContentSupplier.get());
+
+    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(1);
+    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(1);
 
   }
 }
