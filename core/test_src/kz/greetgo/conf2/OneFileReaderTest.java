@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import kz.greetgo.conf2.lines.ConfigLine;
 import kz.greetgo.conf2.lines.ConfigLineKeyValue;
@@ -109,7 +113,7 @@ public class OneFileReaderTest {
 
     String path = RND.str(10) + '/' + RND.str(10);
 
-    Supplier<List<ConfigLine>> defaultContentSupplier = () -> List.of(new  ConfigLineKeyValue("dg", "sdf", false));
+    Supplier<List<ConfigLine>> defaultContentSupplier = () -> List.of(new ConfigLineKeyValue("dg", "sdf", false));
 
     OneFileReader oneFileReader = new OneFileReader(path, fs, defaultContentSupplier, () -> 300, time::getTimeInMillis);
 
@@ -134,4 +138,96 @@ public class OneFileReaderTest {
     assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(1);
 
   }
+
+  @Test
+  public void content__multicurrent__callAndReturn__ContentCounterOneTime() throws InterruptedException {
+
+    Calendar time = new GregorianCalendar();
+
+    FileSystemAccessForTests fs = new FileSystemAccessForTests();
+    fs.nowSupplier = time::getTime;
+
+    String path = RND.str(10) + '/' + RND.str(10);
+
+    List<ConfigLine> content = rndFileContent();
+
+    fs.writeFile(path, content);
+
+    ExecutorService service = Executors.newFixedThreadPool(10);
+    CountDownLatch  latch   = new CountDownLatch(10);
+
+    final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
+    final AtomicReference<OneFileReader>    oneFileReader  = new AtomicReference<>();
+
+    OneFileReader fileReader = new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis);
+
+    Runnable task = () -> {
+      oneFileReader.set(fileReader);
+
+      //
+      //
+      actualContent1.set(oneFileReader.get().content());
+      //
+      //
+
+      latch.countDown();
+    };
+
+    for (int i = 0; i < 10; i++) {
+      service.submit(task);
+    }
+    latch.await();
+    assertThat(actualContent1.get()).isEqualTo(content);
+
+    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(1);
+    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(1);
+
+  }
+  @Test
+  public void content__multicurrent__callAndReturn__ContentCounterEqqualToCallNumbers() throws InterruptedException {
+
+    Calendar time = new GregorianCalendar();
+
+    FileSystemAccessForTests fs = new FileSystemAccessForTests();
+    fs.nowSupplier = time::getTime;
+
+    String path = RND.str(10) + '/' + RND.str(10);
+
+    List<ConfigLine> content = rndFileContent();
+
+    fs.writeFile(path, content);
+
+    ExecutorService service = Executors.newFixedThreadPool(10);
+    CountDownLatch  latch   = new CountDownLatch(10);
+
+    final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
+    final AtomicReference<OneFileReader>    oneFileReader  = new AtomicReference<>();
+
+    OneFileReader fileReader = new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis);
+
+    Runnable task = () -> {
+      oneFileReader.set(fileReader);
+
+      //
+      //
+      actualContent1.set(oneFileReader.get().content());
+      //
+      //
+
+      time.add(Calendar.MILLISECOND, 2000);
+
+      latch.countDown();
+    };
+
+    for (int i = 0; i < 10; i++) {
+      service.submit(task);
+    }
+    latch.await();
+    assertThat(actualContent1.get()).isEqualTo(content);
+
+    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(10);
+    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(10);
+
+  }
+
 }
