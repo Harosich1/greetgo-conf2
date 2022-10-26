@@ -140,7 +140,7 @@ public class OneFileReaderTest {
   }
 
   @Test
-  public void content__multicurrent__callAndReturn__ContentCounterOneTime() throws InterruptedException {
+  public void content__concurrent__callAndReturn__ContentCounterOneTime() throws InterruptedException {
 
     Calendar time = new GregorianCalendar();
 
@@ -153,11 +153,13 @@ public class OneFileReaderTest {
 
     fs.writeFile(path, content);
 
-    ExecutorService service = Executors.newFixedThreadPool(10);
+    ExecutorService service = Executors.newFixedThreadPool(10);//TODO тут 10 нужно вынести в константу - она несколько раз встречается
     CountDownLatch  latch   = new CountDownLatch(10);
 
     final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
-    final AtomicReference<OneFileReader>    oneFileReader  = new AtomicReference<>();
+
+    // TODO эта переменная не нужно - c fileReader можно напрямую
+    final AtomicReference<OneFileReader> oneFileReader = new AtomicReference<>();
 
     OneFileReader fileReader = new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis);
 
@@ -183,8 +185,9 @@ public class OneFileReaderTest {
     assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(1);
 
   }
+
   @Test
-  public void content__multicurrent__callAndReturn__ContentCounterEqqualToCallNumbers() throws InterruptedException {
+  public void content__concurrent__callAndReturn__ContentCounterEqualToCallNumbers() throws InterruptedException {
 
     Calendar time = new GregorianCalendar();
 
@@ -197,20 +200,18 @@ public class OneFileReaderTest {
 
     fs.writeFile(path, content);
 
-    ExecutorService service = Executors.newFixedThreadPool(10);
+    ExecutorService service = Executors.newFixedThreadPool(10);//TODO тут 10 нужно вынести в константу - она несколько раз встречается
     CountDownLatch  latch   = new CountDownLatch(10);
 
     final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
-    final AtomicReference<OneFileReader>    oneFileReader  = new AtomicReference<>();
 
     OneFileReader fileReader = new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis);
 
     Runnable task = () -> {
-      oneFileReader.set(fileReader);
 
       //
       //
-      actualContent1.set(oneFileReader.get().content());
+      actualContent1.set(fileReader.content());
       //
       //
 
@@ -225,9 +226,11 @@ public class OneFileReaderTest {
     latch.await();
     assertThat(actualContent1.get()).isEqualTo(content);
 
-    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(10);
-    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(10);
+    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(10);// TODO нужно переделать тест, чтобы это вызвалось 1 раз,
+    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(10);// TODO а это - 10
 
   }
+
+  // TODO написать остальные тесты. Главный тест: проверяет, чтобы значение по умолчанию формировалось один раз
 
 }
