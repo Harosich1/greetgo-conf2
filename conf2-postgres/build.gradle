@@ -1,0 +1,9 @@
+dependencies {
+
+  implementation project(":core")
+
+  testImplementation "org.postgresql:postgresql:$postgresVersion"
+
+  testImplementation "kz.greetgo.util:greetgo-util:$greetgoUtilVersion"
+  testImplementation "kz.greetgo.util:greetgo-fui:$greetgoUtilVersion"
+}

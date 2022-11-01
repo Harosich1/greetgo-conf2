@@ -1,3 +1,4 @@
 rootProject.name = 'greetgo-conf2'
 
 include "core"
+include "conf2-postgres"
