@@ -1,0 +1,28 @@
+version: "2.3"
+
+networks:
+  default:
+    name: conf2-debug-network
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.12.0.0/16
+
+services:
+
+  pg: #                          docker exec -it conf2-debug-pg psql -U postgres
+    image: postgres:13.4
+    container_name: conf2-debug-pg
+    restart: always
+    mem_limit: 700M
+    environment:
+      POSTGRES_PASSWORD: "8B2NWCyD88V520YCkGpj"
+    ports:
+      - "21001:5432"
+    volumes:
+      - ~/volumes/conf2-api-debug/pg-data:/var/lib/postgresql/data
+      - ./pg-init:/docker-entrypoint-initdb.d
+    command:
+      - "docker-entrypoint.sh"
+      - "-c"
+      - "max-connections=800"
