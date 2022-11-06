@@ -153,22 +153,20 @@ public class OneFileReaderTest {
 
     fs.writeFile(path, content);
 
-    ExecutorService service = Executors.newFixedThreadPool(10);//TODO тут 10 нужно вынести в константу - она несколько раз встречается
+    int nThreads = 10;
+
+    ExecutorService service = Executors.newFixedThreadPool(nThreads);
     CountDownLatch  latch   = new CountDownLatch(10);
 
     final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
 
-    // TODO эта переменная не нужно - c fileReader можно напрямую
-    final AtomicReference<OneFileReader> oneFileReader = new AtomicReference<>();
 
     OneFileReader fileReader = new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis);
 
     Runnable task = () -> {
-      oneFileReader.set(fileReader);
-
       //
       //
-      actualContent1.set(oneFileReader.get().content());
+      actualContent1.set(fileReader.content());
       //
       //
 
@@ -200,7 +198,9 @@ public class OneFileReaderTest {
 
     fs.writeFile(path, content);
 
-    ExecutorService service = Executors.newFixedThreadPool(10);//TODO тут 10 нужно вынести в константу - она несколько раз встречается
+    int nThreads = 10;
+
+    ExecutorService service = Executors.newFixedThreadPool(nThreads);
     CountDownLatch  latch   = new CountDownLatch(10);
 
     final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
@@ -230,7 +230,5 @@ public class OneFileReaderTest {
     assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(10);// TODO а это - 10
 
   }
-
-  // TODO написать остальные тесты. Главный тест: проверяет, чтобы значение по умолчанию формировалось один раз
 
 }
