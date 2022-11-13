@@ -21,6 +21,7 @@ public class OneFileReader {
 
   private List<ConfigLine> cashedContent;
 
+
   public List<ConfigLine> content() {
 
     if (cashedContent == null || currentTimeMs.getAsLong() - System.currentTimeMillis() >= delayBetweenReadMs.getAsLong()) {
@@ -32,6 +33,7 @@ public class OneFileReader {
         fs.writeFile(path, defaultContentSupplier.get());
         cashedContent = defaultContentSupplier.get();
       }
+
     }
 
     return cashedContent;

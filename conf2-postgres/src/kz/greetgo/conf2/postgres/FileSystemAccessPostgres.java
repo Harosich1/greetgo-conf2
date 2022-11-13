@@ -20,14 +20,14 @@ public class FileSystemAccessPostgres implements FileSystemAccess {
   public static class Builder {
     private DataSource dataSource;
 
-    private String tableName;
-    private String colId        = "id";
-    private String colFilename  = "filename";
-    private String colLineNo    = "num";
-    private String colLineType  = "lineType";
-    private String colKey       = "key";
-    private String colValue     = "value";
-    private String colCommented = "commented";
+    private       String tableName;
+    private final String colId        = "id";
+    private final String colFilename  = "filename";
+    private final String colLineNo    = "num";
+    private final String colLineType  = "lineType";
+    private final String colKey       = "key";
+    private final String colValue     = "value";
+    private final String colCommented = "commented";
 
     public Builder dataSource(DataSource dataSource) {
       this.dataSource = dataSource;
@@ -82,7 +82,11 @@ public class FileSystemAccessPostgres implements FileSystemAccess {
   }
 
   private boolean isInitiatedInDb() {
-    throw new RuntimeException("01.11.2022 13:47: Not impl yet: FileSystemAccessPostgres.checkInitInDb");
+    try (Connection connection = builder.dataSource.getConnection()) {
+      return connection.getMetaData().getTables(null, null, builder.tableName, null).next();
+    } catch (Exception exception) {
+      return false;
+    }
   }
 
   @SneakyThrows
@@ -94,7 +98,11 @@ public class FileSystemAccessPostgres implements FileSystemAccess {
         statement.execute("create table " + builder.tableName + " ("
                             + builder.colId + " varchar(30) primary key,"
                             + builder.colFilename + " varchar(300) not null,"
-                            // TODO добить
+                            + builder.colLineNo + " numeric not null,"
+                            + builder.colLineType + " varchar(300) not null,"
+                            + builder.colKey + " varchar(300),"
+                            + builder.colValue + " varchar(3000),"
+                            + builder.colCommented + " varchar(30)"
                             + ")");
 
       }
