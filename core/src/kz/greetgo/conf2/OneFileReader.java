@@ -24,16 +24,19 @@ public class OneFileReader {
 
   public List<ConfigLine> content() {
 
-    if (cashedContent == null || currentTimeMs.getAsLong() - System.currentTimeMillis() >= delayBetweenReadMs.getAsLong()) {
-      if (fs.readFile(path).isPresent()) {
-        FileReader file = fs.readFile(path).get();
-        cashedContent = file.content();
-        file.lastModifiedAt();
-      } else {
-        fs.writeFile(path, defaultContentSupplier.get());
-        cashedContent = defaultContentSupplier.get();
-      }
+    if (fs.readFile(path).isPresent()) {
+      FileReader file = fs.readFile(path).get();
+      file.lastModifiedAt();
 
+      long systemTime   = System.currentTimeMillis();
+      long fileCallTime = currentTimeMs.getAsLong();
+
+      if (cashedContent == null ||   fileCallTime - systemTime >= delayBetweenReadMs.getAsLong()) {
+        cashedContent = file.content();
+      }
+    } else {
+      fs.writeFile(path, defaultContentSupplier.get());
+      cashedContent = defaultContentSupplier.get();
     }
 
     return cashedContent;

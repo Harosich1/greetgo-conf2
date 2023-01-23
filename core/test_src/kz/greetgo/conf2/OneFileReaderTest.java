@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import kz.greetgo.conf2.lines.ConfigLine;
@@ -49,7 +50,7 @@ public class OneFileReaderTest {
     //
     //
 
-    time.add(Calendar.MILLISECOND, 200);
+    time.add(Calendar.MILLISECOND, 10);
 
     //
     //
@@ -61,7 +62,7 @@ public class OneFileReaderTest {
     assertThat(actualContent2).isEqualTo(content);
 
     assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(1);
-    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(1);
+    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(2);
 
   }
 
@@ -180,7 +181,7 @@ public class OneFileReaderTest {
     assertThat(actualContent1.get()).isEqualTo(content);
 
     assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(1);
-    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(1);
+    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(10);
 
   }
 
@@ -201,7 +202,9 @@ public class OneFileReaderTest {
     int nThreads = 10;
 
     ExecutorService service = Executors.newFixedThreadPool(nThreads);
-    CountDownLatch  latch   = new CountDownLatch(10);
+    CountDownLatch  latch   = new CountDownLatch(nThreads);
+
+    Semaphore monitor = new Semaphore(1);
 
     final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
 
@@ -209,13 +212,20 @@ public class OneFileReaderTest {
 
     Runnable task = () -> {
 
-      //
-      //
-      actualContent1.set(fileReader.content());
-      //
-      //
+      try {
+        monitor.acquire();
+        //
+        //
+        actualContent1.set(fileReader.content());
+        //
+        //
 
-      time.add(Calendar.MILLISECOND, 2000);
+        time.add(Calendar.MILLISECOND, 2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+      monitor.release();
 
       latch.countDown();
     };
@@ -226,8 +236,8 @@ public class OneFileReaderTest {
     latch.await();
     assertThat(actualContent1.get()).isEqualTo(content);
 
-    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(10);// TODO нужно переделать тест, чтобы это вызвалось 1 раз,
-    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(10);// TODO а это - 10
+    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(10);
+    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(10);
 
   }
 
