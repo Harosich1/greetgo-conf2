@@ -157,7 +157,7 @@ public class OneFileReaderTest {
     int nThreads = 10;
 
     ExecutorService service = Executors.newFixedThreadPool(nThreads);
-    CountDownLatch  latch   = new CountDownLatch(10);
+    CountDownLatch  latch   = new CountDownLatch(nThreads);
 
     final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
 
@@ -174,7 +174,7 @@ public class OneFileReaderTest {
       latch.countDown();
     };
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < nThreads; i++) {
       service.submit(task);
     }
     latch.await();
