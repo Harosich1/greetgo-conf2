@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.sql.DataSource;
 import kz.greetgo.conf2.FileReader;
@@ -41,7 +42,6 @@ public class FileSystemAccessPostgres implements FileSystemAccess {
 
     public FileSystemAccessPostgres build() {
       requireNonNull(dataSource, "h4OZ3hQ5Bm :: dataSource");
-      // TODO artyom добить тудушки
       return new FileSystemAccessPostgres(this);
     }
 
@@ -54,6 +54,7 @@ public class FileSystemAccessPostgres implements FileSystemAccess {
     this.builder = builder;
   }
 
+  @SneakyThrows
   @Override
   public Optional<FileReader> readFile(String path) {
     checkInit();
@@ -110,9 +111,26 @@ public class FileSystemAccessPostgres implements FileSystemAccess {
     }
   }
 
+  @SneakyThrows
   @Override
   public void writeFile(String path, List<ConfigLine> lines) {
     checkInit();
-    throw new RuntimeException("01.11.2022 13:30: Not impl yet: FileSystemAccessPostgres.writeFile");
+    try (Connection connection = builder.dataSource.getConnection()) {
+
+      try (Statement statement = connection.createStatement()) {
+
+        statement.execute("insert into " + builder.tableName + " values("
+                            + UUID.randomUUID() + ","
+                            + builder.colFilename + ","
+                            + builder.colLineNo + ","
+                            + builder.colLineType + ","
+                            + builder.colKey + ","
+                            + builder.colValue + ","
+                            + builder.colCommented
+                            + ")");
+
+      }
+
+    }
   }
 }
