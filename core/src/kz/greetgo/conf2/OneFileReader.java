@@ -21,23 +21,30 @@ public class OneFileReader {
 
   private List<ConfigLine> cashedContent;
 
+  private Long lastDate;
 
   public List<ConfigLine> content() {
 
-    if (fs.readFile(path).isPresent()) {
-      FileReader file = fs.readFile(path).get();
-      file.lastModifiedAt();
-
       long systemTime   = System.currentTimeMillis();
       long fileCallTime = currentTimeMs.getAsLong();
+      if (cashedContent == null || fileCallTime - systemTime >= delayBetweenReadMs.getAsLong()) {
 
-      if (cashedContent == null ||   fileCallTime - systemTime >= delayBetweenReadMs.getAsLong()) {
-        cashedContent = file.content();
+        System.out.println(cashedContent);
+
+        if (cashedContent != null || fs.readFile(path).isPresent()) {
+          FileReader file = fs.readFile(path).get();
+
+          if (lastDate == null) {
+            lastDate = file.lastModifiedAt().getTime();
+          } else if (lastDate != file.lastModifiedAt().getTime()) {
+            return file.content();
+          }
+          cashedContent = file.content();
+        } else {
+          fs.writeFile(path, defaultContentSupplier.get());
+          cashedContent = defaultContentSupplier.get();
+        }
       }
-    } else {
-      fs.writeFile(path, defaultContentSupplier.get());
-      cashedContent = defaultContentSupplier.get();
-    }
 
     return cashedContent;
   }

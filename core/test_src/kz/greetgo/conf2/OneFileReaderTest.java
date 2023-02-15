@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import kz.greetgo.conf2.lines.ConfigLine;
@@ -62,7 +61,7 @@ public class OneFileReaderTest {
     assertThat(actualContent2).isEqualTo(content);
 
     assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(1);
-    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(2);
+    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(1);
 
   }
 
@@ -162,12 +161,13 @@ public class OneFileReaderTest {
     final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
 
 
-    OneFileReader fileReader = new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis);
+    AtomicReference<OneFileReader> fileReader = new AtomicReference<>();
+    fileReader.set(new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis));
 
     Runnable task = () -> {
       //
       //
-      actualContent1.set(fileReader.content());
+      actualContent1.set(fileReader.get().content());
       //
       //
 
@@ -181,7 +181,7 @@ public class OneFileReaderTest {
     assertThat(actualContent1.get()).isEqualTo(content);
 
     assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(1);
-    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(10);
+    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(1);
 
   }
 
@@ -204,28 +204,21 @@ public class OneFileReaderTest {
     ExecutorService service = Executors.newFixedThreadPool(nThreads);
     CountDownLatch  latch   = new CountDownLatch(nThreads);
 
-    Semaphore monitor = new Semaphore(1);
 
     final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
 
-    OneFileReader fileReader = new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis);
+    AtomicReference<OneFileReader> fileReader = new AtomicReference<>();
+    fileReader.set(new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis));
 
     Runnable task = () -> {
 
-      try {
-        monitor.acquire();
         //
         //
-        actualContent1.set(fileReader.content());
+        actualContent1.set(fileReader.get().content());
         //
         //
 
         time.add(Calendar.MILLISECOND, 2000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-
-      monitor.release();
 
       latch.countDown();
     };
@@ -238,6 +231,53 @@ public class OneFileReaderTest {
 
     assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(10);
     assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(10);
+
+  }
+
+  @Test
+  public void content__concurrent__callMultiTimes__lastModifiedTimeOnce() throws InterruptedException {
+
+    Calendar time = new GregorianCalendar();
+
+    FileSystemAccessForTests fs = new FileSystemAccessForTests();
+    fs.nowSupplier = time::getTime;
+
+    String path = RND.str(10) + '/' + RND.str(10);
+
+    List<ConfigLine> content = rndFileContent();
+
+    fs.writeFile(path, content);
+
+    int nThreads = 10;
+
+    ExecutorService service = Executors.newFixedThreadPool(nThreads);
+    CountDownLatch  latch   = new CountDownLatch(nThreads);
+
+    final AtomicReference<List<ConfigLine>> actualContent1 = new AtomicReference<>();
+
+    AtomicReference<OneFileReader> fileReader = new AtomicReference<>();
+    fileReader.set(new OneFileReader(path, fs, null, () -> 300, time::getTimeInMillis));
+
+    Runnable task = () -> {
+
+        //
+        //
+        actualContent1.set(fileReader.get().content());
+        //
+        //
+
+        time.add(Calendar.MILLISECOND, 2000);
+
+      latch.countDown();
+    };
+
+    for (int i = 0; i < nThreads; i++) {
+      service.submit(task);
+    }
+    latch.await();
+    assertThat(actualContent1.get()).isEqualTo(content);
+
+    assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(1);
 
   }
 
