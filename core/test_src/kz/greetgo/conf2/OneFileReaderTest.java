@@ -98,7 +98,7 @@ public class OneFileReaderTest {
     assertThat(actualContent1).isEqualTo(content);
     assertThat(actualContent2).isEqualTo(content);
 
-    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(2);
+    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(1);
     assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(2);
 
   }
@@ -229,7 +229,7 @@ public class OneFileReaderTest {
     latch.await();
     assertThat(actualContent1.get()).isEqualTo(content);
 
-    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(10);
+    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(1);
     assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(10);
 
   }
@@ -277,6 +277,7 @@ public class OneFileReaderTest {
     latch.await();
     assertThat(actualContent1.get()).isEqualTo(content);
 
+    assertThat(fs.allFiles.get(path).contentReadCount).isEqualTo(1);
     assertThat(fs.allFiles.get(path).lastModifiedAtCallCount).isEqualTo(1);
 
   }

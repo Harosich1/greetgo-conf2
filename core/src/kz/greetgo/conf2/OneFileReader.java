@@ -1,6 +1,8 @@
 package kz.greetgo.conf2;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import kz.greetgo.conf2.lines.ConfigLine;
@@ -19,33 +21,31 @@ public class OneFileReader {
 
   private final LongSupplier currentTimeMs;
 
-  private List<ConfigLine> cashedContent;
+  private final AtomicReference<List<ConfigLine>> cashedContent = new AtomicReference<>();
 
-  private Long lastDate;
+  private final AtomicLong lastDate = new AtomicLong();
 
   public List<ConfigLine> content() {
 
       long systemTime   = System.currentTimeMillis();
       long fileCallTime = currentTimeMs.getAsLong();
-      if (cashedContent == null || fileCallTime - systemTime >= delayBetweenReadMs.getAsLong()) {
+      if (cashedContent.get() == null || fileCallTime - systemTime >= delayBetweenReadMs.getAsLong()) {
 
-        System.out.println(cashedContent);
-
-        if (cashedContent != null || fs.readFile(path).isPresent()) {
+        if (fs.readFile(path).isPresent()) {
           FileReader file = fs.readFile(path).get();
 
-          if (lastDate == null) {
-            lastDate = file.lastModifiedAt().getTime();
-          } else if (lastDate != file.lastModifiedAt().getTime()) {
+          if (lastDate.get() == 0) {
+            lastDate.set(file.lastModifiedAt().getTime());
+            cashedContent.set(file.content());
+          } else if (lastDate.get() != file.lastModifiedAt().getTime()) {
             return file.content();
           }
-          cashedContent = file.content();
         } else {
           fs.writeFile(path, defaultContentSupplier.get());
-          cashedContent = defaultContentSupplier.get();
+          cashedContent.set(defaultContentSupplier.get());
         }
       }
 
-    return cashedContent;
+    return cashedContent.get();
   }
 }
