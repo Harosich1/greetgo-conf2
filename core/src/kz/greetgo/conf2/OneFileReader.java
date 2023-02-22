@@ -38,6 +38,7 @@ public class OneFileReader {
             lastDate.set(file.lastModifiedAt().getTime());
             cashedContent.set(file.content());
           } else if (lastDate.get() != file.lastModifiedAt().getTime()) {
+            cashedContent.set(file.content());
             return file.content();
           }
         } else {
